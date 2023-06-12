@@ -26,7 +26,7 @@ public class UserService : BaseDataService<ApplicationDbContext>, IUserService
         _loggerService = loggerService;
     }
 
-    public async Task<string> AddUser(string firstName, string lastName)
+    public async Task<string> AddUserAsync(string firstName, string lastName)
     {
        return await ExecuteSafeAsync(async () =>
         {
@@ -39,7 +39,7 @@ public class UserService : BaseDataService<ApplicationDbContext>, IUserService
         });
     }
 
-    public async Task<User> GetUser(string id)
+    public async Task<User> GetUserAsync(string id)
     {
         var user = await _userRepository.GetUserAsync(id);
 
@@ -56,5 +56,41 @@ public class UserService : BaseDataService<ApplicationDbContext>, IUserService
             LastName = user.LastName,
             FullName = $"{user.FirstName} {user.LastName}"
         };
+    }
+
+    public async Task<bool> UpdateUserAsync(string id, string newFirstName, string newLastName)
+    {
+        return await ExecuteSafeAsync(async () =>
+        {
+            var result = await _userRepository.UpdateUserAsync(id, newFirstName, newLastName);
+
+            if (result)
+            {
+                _loggerService.LogInformation($"Updated user with Id = {id}");
+                var notifyMassage = "Updating was successful";
+                var notifyTo = "user@gmail.com";
+                _notificationService.Notify(NotifyType.Email, notifyMassage, notifyTo);
+            }
+
+            return result;
+        });
+    }
+
+    public async Task<bool> DeleteUserAsync(string id)
+    {
+        return await ExecuteSafeAsync(async () =>
+        {
+            var result = await _userRepository.DeleteUserAsync(id);
+
+            if (result)
+            {
+                _loggerService.LogInformation($"Delete user with Id = {id}");
+                var notifyMassage = "Deleting was successful";
+                var notifyTo = "user@gmail.com";
+                _notificationService.Notify(NotifyType.Email, notifyMassage, notifyTo);
+            }
+
+            return result;
+        });
     }
 }

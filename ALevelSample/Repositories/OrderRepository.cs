@@ -24,15 +24,13 @@ public class OrderRepository : IOrderRepository
     {
         var result = await _dbContext.Orders.AddAsync(new OrderEntity()
         {
-            UserId = user
+            UserId = user,
+            OrderItems = items.Select(s => new OrderItemEntity()
+            {
+                Count = s.Count,
+                ProductId = s.ProductId
+            }).ToList()
         });
-
-        await _dbContext.OrderItems.AddRangeAsync(items.Select(s => new OrderItemEntity()
-        {
-            Count = s.Count,
-            OrderId = result.Entity.Id,
-            ProductId = s.ProductId
-        }));
 
         await _dbContext.SaveChangesAsync();
 
@@ -47,5 +45,39 @@ public class OrderRepository : IOrderRepository
     public async Task<IEnumerable<OrderEntity>?> GetOrderByUserIdAsync(string id)
     {
         return await _dbContext.Orders.Include(i => i.OrderItems).Where(f => f.UserId == id).ToListAsync();
+    }
+
+    public async Task<bool> UpdateOrderAsync(int id, string userId, List<OrderItem> newItems)
+    {
+        _dbContext.Orders.Update(new OrderEntity
+        {
+            Id = id,
+            UserId = userId,
+            OrderItems = newItems.Select(s => new OrderItemEntity()
+            {
+                Count = s.Count,
+                OrderId = id,
+                ProductId = s.ProductId
+            }).ToList(),
+        });
+
+        await _dbContext.SaveChangesAsync();
+
+        return true;
+    }
+
+    public async Task<bool> DeleteOrderAsync(int id)
+    {
+        var order = await GetOrderAsync(id);
+
+        if (order == null)
+        {
+            return false;
+        }
+
+        _dbContext.Remove(order);
+        await _dbContext.SaveChangesAsync();
+
+        return true;
     }
 }

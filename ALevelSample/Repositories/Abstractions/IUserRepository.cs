@@ -7,4 +7,6 @@ public interface IUserRepository
 {
     Task<string> AddUserAsync(string firstName, string lastName);
     Task<UserEntity?> GetUserAsync(string id);
+    Task<bool> UpdateUserAsync(string id, string newFirstName, string newLastName);
+    Task<bool> DeleteUserAsync(string id);
 }

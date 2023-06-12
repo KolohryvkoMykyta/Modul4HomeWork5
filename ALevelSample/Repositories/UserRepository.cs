@@ -37,4 +37,36 @@ public class UserRepository : IUserRepository
     {
         return await _dbContext.Users.FirstOrDefaultAsync(f => f.Id == id);
     }
+
+    public async Task<bool> UpdateUserAsync(string id, string newFirstName, string newLastName)
+    {
+        var user = await GetUserAsync(id);
+
+        if (user == null)
+        {
+            return false;
+        }
+
+        user.FirstName = newFirstName;
+        user.LastName = newLastName;
+
+        _dbContext.Users.Update(user);
+        await _dbContext.SaveChangesAsync();
+
+        return true;
+    }
+
+    public async Task<bool> DeleteUserAsync(string id)
+    {
+        var user = await GetUserAsync(id);
+        if (user == null)
+        {
+            return false;
+        }
+
+        _dbContext.Users.Remove(user);
+        await _dbContext.SaveChangesAsync();
+
+        return true;
+    }
 }

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ALevelSample.Data;
 using ALevelSample.Models;
+using ALevelSample.Repositories;
 using ALevelSample.Repositories.Abstractions;
 using ALevelSample.Services.Abstractions;
 using Microsoft.Extensions.Logging;
@@ -84,5 +85,35 @@ public class OrderService : BaseDataService<ApplicationDbContext>, IOrderService
                 }
             })
         }).ToList();
+    }
+
+    public async Task<bool> UpdateOrderAsync(int id, string newUser, List<OrderItem> newItems)
+    {
+        return await ExecuteSafeAsync(async () =>
+        {
+            var result = await _orderRepository.UpdateOrderAsync(id, newUser, newItems);
+
+            if (result)
+            {
+                _loggerService.LogInformation($"Updated order with Id = {id}");
+            }
+
+            return result;
+        });
+    }
+
+    public async Task<bool> DeleteOrderAsync(int id)
+    {
+        return await ExecuteSafeAsync(async () =>
+        {
+            var result = await _orderRepository.DeleteOrderAsync(id);
+
+            if (result)
+            {
+                _loggerService.LogInformation($"Delete order with Id = {id}");
+            }
+
+            return result;
+        });
     }
 }
