@@ -49,17 +49,20 @@ public class OrderRepository : IOrderRepository
 
     public async Task<bool> UpdateOrderAsync(int id, string userId, List<OrderItem> newItems)
     {
-        _dbContext.Orders.Update(new OrderEntity
+        var product = _dbContext.Orders.Where(p => p.Id == id).FirstOrDefault();
+
+        if (product == null)
         {
-            Id = id,
-            UserId = userId,
-            OrderItems = newItems.Select(s => new OrderItemEntity()
-            {
-                Count = s.Count,
-                OrderId = id,
-                ProductId = s.ProductId
-            }).ToList(),
-        });
+            return false;
+        }
+
+        product.UserId = userId;
+        product.OrderItems = newItems.Select(s => new OrderItemEntity()
+        {
+            Count = s.Count,
+            OrderId = id,
+            ProductId = s.ProductId
+        }).ToList();
 
         await _dbContext.SaveChangesAsync();
 

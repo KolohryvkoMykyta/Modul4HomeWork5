@@ -82,6 +82,25 @@ public class App
 
         var userOrder = await _orderService.GetOrderByUserIdAsync(userId);
 
+        var order = await _orderService.GetOrderAsync(order1);
+
+        var isUpdatedSucces = await _orderService.UpdateOrderAsync(order1, userId, new List<OrderItem>()
+        {
+            new OrderItem()
+            {
+                Count = 3,
+                ProductId = productId[1]
+            },
+
+            new OrderItem()
+            {
+                Count = 4,
+                ProductId = productId[2]
+            }
+        });
+
+        order = await _orderService.GetOrderAsync(order1);
+
         var isDeleteSucces = await _orderService.DeleteOrderAsync(order2);
 
         var productsFilterByName = _productService.PagingWithNameFilter(4, "product");
